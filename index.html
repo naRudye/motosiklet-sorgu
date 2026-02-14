@@ -3,100 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yedek Parça Sorgulama</title>
+    <title>Yedek Parça Katalog Sorgulama</title>
     <style>
-        /* CSS kısımlarında değişiklik yapmadım, aynen korunuyor */
+        /* Mevcut stillerin korunuyor, katalog için eklemeler yapıldı */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 500px; width: 100%; padding: 40px; }
+        .container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 600px; width: 100%; padding: 30px; }
         h1 { color: #2c3e50; font-size: 28px; margin-bottom: 10px; text-align: center; }
         .subtitle { color: #7f8c8d; text-align: center; margin-bottom: 30px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; color: #34495e; font-weight: 600; margin-bottom: 8px; }
-        input { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; color: #34495e; font-weight: 600; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; }
         input:focus { outline: none; border-color: #667eea; }
-        button { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
-        button:hover { transform: translateY(-2px); }
-        .result { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; }
+        .btn-sorgula { width: 100%; padding: 15px; background: #2c3e50; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        /* Katalog Kart Tasarımı */
+        .katalog { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 30px; }
+        .parca-kart { border: 2px solid #f0f0f0; border-radius: 15px; padding: 20px; text-align: center; transition: 0.3s; }
+        .parca-kart:hover { border-color: #667eea; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .parca-kart img { max-width: 100%; height: 180px; object-fit: contain; border-radius: 10px; margin-bottom: 15px; background: #f9f9f9; }
+        .parca-adi { font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
+        .parca-fiyat { font-size: 20px; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .btn-onay { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .result { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; text-align: center; }
         .success { background: #d4edda; color: #155724; }
         .error { background: #f8d7da; color: #721c24; }
+        .loading { color: white; text-align: center; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🏍️ Yedek Parça Sorgulama</h1>
-        <p class="subtitle">Şase numaranızı girerek yedek parçalarınızı sorgulayın</p>
+    <div class="container" id="mainContainer">
+        <h1>🏍️ Parça Kataloğu</h1>
+        <p class="subtitle">Şase bilginize özel parçaları listeleyin</p>
         
         <form id="saseForm">
             <div class="form-group">
                 <label>Şase Numarası *</label>
-                <input type="text" id="sase" required placeholder="17 haneli şase numarası">
+                <input type="text" id="sase" required placeholder="Örn: JH2SC...">
             </div>
-            
             <div class="form-group">
                 <label>Ad Soyad *</label>
                 <input type="text" id="ad" required placeholder="Adınız Soyadınız">
             </div>
-            
             <div class="form-group">
                 <label>Email *</label>
                 <input type="email" id="email" required placeholder="ornek@email.com">
             </div>
-            
             <div class="form-group">
                 <label>Telefon *</label>
                 <input type="tel" id="telefon" required placeholder="05XX XXX XX XX">
             </div>
-            
-            <button type="submit">🔍 Sorgula</button>
+            <button type="submit" class="btn-sorgula">🔍 Parçaları Getir</button>
         </form>
-        
+
+        <div id="loading" class="loading" style="color: #2c3e50;">🔄 Katalog hazırlanıyor...</div>
         <div class="result" id="result"></div>
+        <div id="katalogAlani" class="katalog"></div>
     </div>
     
     <script>
-        document.getElementById('saseForm').addEventListener('submit', async (e) => {
+        const saseForm = document.getElementById('saseForm');
+        const katalogAlani = document.getElementById('katalogAlani');
+        const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
+
+        saseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const result = document.getElementById('result');
-            result.style.display = 'block';
-            result.className = 'result';
-            result.innerHTML = 'İşleniyor...'; // Kullanıcıya geri bildirim
-            
-            const data = {
+            // Sıfırlama
+            katalogAlani.innerHTML = '';
+            result.style.display = 'none';
+            loading.style.display = 'block';
+
+            const payload = {
                 sase_numarasi: document.getElementById('sase').value,
                 ad_soyad: document.getElementById('ad').value,
                 email: document.getElementById('email').value,
                 telefon: document.getElementById('telefon').value
             };
-            
-            // YENİ NGROK URL'NİZ BURADA:
+
             const webhookUrl = 'https://nongraphic-cozily-randolph.ngrok-free.dev/webhook-test/sase-sorgu';
-            
+
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
                 
                 const res = await response.json();
-                
-                if (res.durum === 'BASARILI') {
-                    result.className = 'result success';
-                    result.innerHTML = '<h3>✅ ' + (res.mesaj || 'İşlem Başarılı') + '</h3><p>Sipariş No: ' + (res.siparis_no || '-') + '</p><p>Toplam: ' + (res.toplam || '0') + ' TL</p><p>📧 Email gönderildi</p>';
+                loading.style.display = 'none';
+
+                if (res.durum === 'OK' && res.liste) {
+                    res.liste.forEach(parca => {
+                        const kart = document.createElement('div');
+                        kart.className = 'parca-kart';
+                        kart.innerHTML = `
+                            <img src="${parca.Gorsel_URL}" alt="${parca.Parca_Adi}">
+                            <div class="parca-adi">${parca.Parca_Adi}</div>
+                            <div class="parca-fiyat">${parca.Fiyat} TL</div>
+                            <button class="btn-onay" onclick="siparisOnayla('${parca.Parca_Adi}', '${parca.Fiyat}')">🛒 Siparişi Onayla</button>
+                        `;
+                        katalogAlani.appendChild(kart);
+                    });
                 } else {
                     result.className = 'result error';
-                    result.innerHTML = '<h3>❌ ' + (res.mesaj || 'Bir hata oluştu') + '</h3>';
+                    result.style.display = 'block';
+                    result.innerHTML = '<h3>❌ ' + (res.mesaj || 'Uygun parça bulunamadı') + '</h3>';
                 }
             } catch (error) {
-                console.error('Hata Detayı:', error);
+                loading.style.display = 'none';
                 result.className = 'result error';
-                result.innerHTML = '<h3>❌ Bağlantı hatası</h3><p>n8n veya ngrok kapalı olabilir.</p>';
+                result.style.display = 'block';
+                result.innerHTML = '<h3>❌ Bağlantı hatası</h3>';
             }
         });
+
+        async function siparisOnayla(parcaAdi, fiyat) {
+            if (!confirm(parcaAdi + ' için sipariş oluşturulsun mu?')) return;
+
+            result.style.display = 'block';
+            result.className = 'result success';
+            result.innerHTML = '⚙️ Siparişiniz işleniyor, lütfen bekleyin...';
+
+            // Burası n8n'deki "Sipariş Kaydı" adımını tetikleyecek olan kısımdır.
+            // Aynı webhook'a "onay: true" bilgisi gönderiyoruz.
+            const data = {
+                onay: true,
+                secilen_parca: parcaAdi,
+                fiyat: fiyat,
+                sase_numarasi: document.getElementById('sase').value,
+                ad_soyad: document.getElementById('ad').value,
+                email: document.getElementById('email').value,
+                telefon: document.getElementById('telefon').value
+            };
+
+            try {
+                const response = await fetch('https://nongraphic-cozily-randolph.ngrok-free.dev/webhook-test/sase-sorgu', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const finalRes = await response.json();
+                
+                result.innerHTML = `<h3>✅ Sipariş Alındı!</h3><p>${parcaAdi} için kaydınız oluşturuldu.</p>`;
+                katalogAlani.innerHTML = ''; // Kataloğu gizle
+            } catch (e) {
+                result.className = 'result error';
+                result.innerHTML = '<h3>❌ Onay işlemi başarısız.</h3>';
+            }
+        }
     </script>
 </body>
 </html>
