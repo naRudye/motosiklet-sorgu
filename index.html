@@ -1,4 +1,3 @@
-const res = await fetch https://nongraphic-cozily-randolph.ngrok-free.dev 
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -6,100 +5,21 @@ const res = await fetch https://nongraphic-cozily-randolph.ngrok-free.dev
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yedek Parça Sorgulama</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 500px;
-            width: 100%;
-            padding: 40px;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            font-size: 28px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        .subtitle {
-            color: #7f8c8d;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            color: #34495e;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-        }
-        
-        .result {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 10px;
-            display: none;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-        }
+        /* CSS kısımlarında değişiklik yapmadım, aynen korunuyor */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 500px; width: 100%; padding: 40px; }
+        h1 { color: #2c3e50; font-size: 28px; margin-bottom: 10px; text-align: center; }
+        .subtitle { color: #7f8c8d; text-align: center; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; color: #34495e; font-weight: 600; margin-bottom: 8px; }
+        input { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; }
+        input:focus { outline: none; border-color: #667eea; }
+        button { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        button:hover { transform: translateY(-2px); }
+        .result { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
@@ -139,7 +59,9 @@ const res = await fetch https://nongraphic-cozily-randolph.ngrok-free.dev
             e.preventDefault();
             
             const result = document.getElementById('result');
-            result.style.display = 'none';
+            result.style.display = 'block';
+            result.className = 'result';
+            result.innerHTML = 'İşleniyor...'; // Kullanıcıya geri bildirim
             
             const data = {
                 sase_numarasi: document.getElementById('sase').value,
@@ -148,8 +70,11 @@ const res = await fetch https://nongraphic-cozily-randolph.ngrok-free.dev
                 telefon: document.getElementById('telefon').value
             };
             
+            // YENİ NGROK URL'NİZ BURADA:
+            const webhookUrl = 'https://nongraphic-cozily-randolph.ngrok-free.dev/workflow/GHH6FurOB4FgQAVg?noObject1d=2MHNRH91IyTX1LA6j';
+            
             try {
-                const response = await fetch('http://localhost:5678/workflow/GHH6FurOB4FgQAVg?noObject1d=2MHNRH91IyTX1LA6j', {
+                const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -159,26 +84,19 @@ const res = await fetch https://nongraphic-cozily-randolph.ngrok-free.dev
                 
                 const res = await response.json();
                 
-                result.style.display = 'block';
-                
                 if (res.durum === 'BASARILI') {
                     result.className = 'result success';
-                    result.innerHTML = '<h3>✅ ' + res.mesaj + '</h3><p>Sipariş No: ' + res.siparis_no + '</p><p>Toplam: ' + res.toplam + ' TL</p><p>📧 Email gönderildi</p>';
+                    result.innerHTML = '<h3>✅ ' + (res.mesaj || 'İşlem Başarılı') + '</h3><p>Sipariş No: ' + (res.siparis_no || '-') + '</p><p>Toplam: ' + (res.toplam || '0') + ' TL</p><p>📧 Email gönderildi</p>';
                 } else {
                     result.className = 'result error';
-                    result.innerHTML = '<h3>❌ Bir hata oluştu</h3>';
+                    result.innerHTML = '<h3>❌ ' + (res.mesaj || 'Bir hata oluştu') + '</h3>';
                 }
             } catch (error) {
-                result.style.display = 'block';
+                console.error('Hata Detayı:', error);
                 result.className = 'result error';
-                result.innerHTML = '<h3>❌ Bağlantı hatası</h3>';
+                result.innerHTML = '<h3>❌ Bağlantı hatası</h3><p>n8n veya ngrok kapalı olabilir.</p>';
             }
         });
     </script>
 </body>
 </html>
-```
-
----
-
-
