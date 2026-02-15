@@ -310,7 +310,7 @@
     
     <script>
         const WEBHOOK_URL = 'https://narudy.app.n8n.cloud/webhook/sase-sorgu-v2';
-        
+        const SIPARIS_WEBHOOK_URL = 'https://narudy.app.n8n.cloud/webhook/siparis-olustur';
         let musteriData = {};
         let aracData = {};
         let secilenParcalar = [];
@@ -450,12 +450,50 @@
             document.getElementById('step1').classList.remove('hidden');
         });
         
-        // Sipariş Ver (Şimdilik alert)
-        document.getElementById('siparisBtn').addEventListener('click', () => {
-            alert('Sipariş oluşturma henüz hazır değil. Önce bu kısmı test edin!');
-            console.log('Seçilen Parçalar:', secilenParcalar);
-            console.log('Müşteri:', musteriData);
+       // Sipariş Ver
+document.getElementById('siparisBtn').addEventListener('click', async () => {
+    document.getElementById('siparisBtn').disabled = true;
+    document.getElementById('siparisBtn').textContent = 'Sipariş Oluşturuluyor...';
+    
+    const siparisData = {
+        ...musteriData,
+        ...aracData,
+        secilen_parcalar: secilenParcalar,
+        parca_adedi: secilenParcalar.length,
+        toplam_fiyat: secilenParcalar.reduce((sum, p) => sum + p.fiyat, 0)
+    };
+    
+    try {
+        const response = await fetch(SIPARIS_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(siparisData)
         });
+        
+        const result = await response.json();
+        
+        if (result.durum === 'BASARILI') {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('sonucCard').classList.remove('hidden');
+            document.getElementById('sonucMesaj').innerHTML = `
+                <div class="alert alert-success">
+                    <h2>✅ Siparişiniz Oluşturuldu!</h2>
+                    <p><strong>Sipariş No:</strong> ${result.siparis_no}</p>
+                    <p><strong>Toplam Tutar:</strong> ${result.toplam} TL</p>
+                    <p style="margin-top: 20px;">📧 Sipariş detayları email adresinize gönderildi.</p>
+                </div>
+            `;
+        } else {
+            alert('Sipariş oluşturulamadı. Lütfen tekrar deneyin.');
+        }
+    } catch (error) {
+        alert('Bağlantı hatası: ' + error.message);
+    }
+    
+    document.getElementById('siparisBtn').disabled = false;
+    document.getElementById('siparisBtn').textContent = 'Sipariş Ver';
+});
+      
     </script>
 </body>
 </html>
