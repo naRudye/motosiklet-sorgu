@@ -3,157 +3,459 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yedek Parça Katalog Sorgulama</title>
+    <title>Yedek Parça Sorgulama</title>
     <style>
-        /* Mevcut stillerin korunuyor, katalog için eklemeler yapıldı */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 600px; width: 100%; padding: 30px; }
-        h1 { color: #2c3e50; font-size: 28px; margin-bottom: 10px; text-align: center; }
-        .subtitle { color: #7f8c8d; text-align: center; margin-bottom: 30px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; color: #34495e; font-weight: 600; margin-bottom: 5px; }
-        input { width: 100%; padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; }
-        input:focus { outline: none; border-color: #667eea; }
-        .btn-sorgula { width: 100%; padding: 15px; background: #2c3e50; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        /* Katalog Kart Tasarımı */
-        .katalog { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 30px; }
-        .parca-kart { border: 2px solid #f0f0f0; border-radius: 15px; padding: 20px; text-align: center; transition: 0.3s; }
-        .parca-kart:hover { border-color: #667eea; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .parca-kart img { max-width: 100%; height: 180px; object-fit: contain; border-radius: 10px; margin-bottom: 15px; background: #f9f9f9; }
-        .parca-adi { font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
-        .parca-fiyat { font-size: 20px; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
-        .btn-onay { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
         
-        .result { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; text-align: center; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        .loading { color: white; text-align: center; margin-top: 10px; display: none; }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #34495e;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .arac-bilgi {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .arac-bilgi h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .parcalar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .parca-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .parca-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .parca-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .parca-card.stok-yok {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .parca-gorsel {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #f5f5f5;
+        }
+        
+        .parca-isim {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .parca-fiyat {
+            color: #27ae60;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .parca-stok {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .stok-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .stok-var {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .stok-yok-badge {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .checkbox-wrapper {
+            margin-top: 10px;
+        }
+        
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .siparis-ozet {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .siparis-ozet h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .toplam-fiyat {
+            font-size: 24px;
+            color: #27ae60;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
-    <div class="container" id="mainContainer">
-        <h1>🏍️ Parça Kataloğu</h1>
-        <p class="subtitle">Şase bilginize özel parçaları listeleyin</p>
+    <div class="container">
+        <!-- AŞAMA 1: Şase Sorgusu -->
+        <div id="step1" class="card">
+            <h1>🏍️ Yedek Parça Sorgulama</h1>
+            
+            <form id="saseForm">
+                <div class="form-group">
+                    <label>Şase Numarası *</label>
+                    <input type="text" id="sase" required placeholder="17 haneli şase numarası">
+                </div>
+                
+                <div class="form-group">
+                    <label>Ad Soyad *</label>
+                    <input type="text" id="ad" required placeholder="Adınız Soyadınız">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="email" required placeholder="ornek@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Telefon *</label>
+                    <input type="tel" id="telefon" required placeholder="05XX XXX XX XX">
+                </div>
+                
+                <button type="submit" id="sorgulaBtn">🔍 Parçaları Sorgula</button>
+            </form>
+            
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Sorgulanıyor...</p>
+            </div>
+        </div>
         
-        <form id="saseForm">
-            <div class="form-group">
-                <label>Şase Numarası *</label>
-                <input type="text" id="sase" required placeholder="Örn: JH2SC...">
+        <!-- AŞAMA 2: Parça Seçimi -->
+        <div id="step2" class="hidden">
+            <div class="card">
+                <div class="arac-bilgi" id="aracBilgi"></div>
+                
+                <h2 style="margin-bottom: 20px;">Mevcut Yedek Parçalar</h2>
+                
+                <div class="parcalar-grid" id="parcalarGrid"></div>
+                
+                <div class="siparis-ozet">
+                    <h3>Sipariş Özeti</h3>
+                    <div id="secilenParcalar">Henüz parça seçilmedi</div>
+                    <div class="toplam-fiyat" id="toplamFiyat">0 TL</div>
+                </div>
+                
+                <button id="siparisBtn" disabled>Sipariş Ver</button>
+                <button id="geriBtn" style="margin-top: 10px; background: #6c757d;">← Geri Dön</button>
             </div>
-            <div class="form-group">
-                <label>Ad Soyad *</label>
-                <input type="text" id="ad" required placeholder="Adınız Soyadınız">
-            </div>
-            <div class="form-group">
-                <label>Email *</label>
-                <input type="email" id="email" required placeholder="ornek@email.com">
-            </div>
-            <div class="form-group">
-                <label>Telefon *</label>
-                <input type="tel" id="telefon" required placeholder="05XX XXX XX XX">
-            </div>
-            <button type="submit" class="btn-sorgula">🔍 Parçaları Getir</button>
-        </form>
-
-        <div id="loading" class="loading" style="color: #2c3e50;">🔄 Katalog hazırlanıyor...</div>
-        <div class="result" id="result"></div>
-        <div id="katalogAlani" class="katalog"></div>
+        </div>
+        
+        <!-- Sonuç Mesajı -->
+        <div id="sonucCard" class="card hidden">
+            <div id="sonucMesaj"></div>
+            <button onclick="location.reload()" style="margin-top: 20px;">Yeni Sorgulama</button>
+        </div>
     </div>
     
     <script>
-        const saseForm = document.getElementById('saseForm');
-        const katalogAlani = document.getElementById('katalogAlani');
-        const result = document.getElementById('result');
-        const loading = document.getElementById('loading');
-
-        saseForm.addEventListener('submit', async (e) => {
+        const WEBHOOK_URL = 'https://nongraphic-cozily-randolph.ngrok-free.dev/webhook/sase-sorgu-v2';
+        
+        let musteriData = {};
+        let aracData = {};
+        let secilenParcalar = [];
+        
+        // AŞAMA 1: Şase Sorgusu
+        document.getElementById('saseForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Sıfırlama
-            katalogAlani.innerHTML = '';
-            result.style.display = 'none';
-            loading.style.display = 'block';
-
-            const payload = {
+            document.getElementById('sorgulaBtn').disabled = true;
+            document.getElementById('loading').classList.remove('hidden');
+            
+            musteriData = {
                 sase_numarasi: document.getElementById('sase').value,
                 ad_soyad: document.getElementById('ad').value,
                 email: document.getElementById('email').value,
                 telefon: document.getElementById('telefon').value
             };
-
-            const webhookUrl = 'https://nongraphic-cozily-randolph.ngrok-free.dev/webhook-test/sase-sorgu';
-
+            
             try {
-                const response = await fetch(webhookUrl, {
+                const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(musteriData)
                 });
                 
-                const res = await response.json();
-                loading.style.display = 'none';
-
-                if (res.durum === 'OK' && res.liste) {
-                    res.liste.forEach(parca => {
-                        const kart = document.createElement('div');
-                        kart.className = 'parca-kart';
-                        kart.innerHTML = `
-                            <img src="${parca.Gorsel_URL}" alt="${parca.Parca_Adi}">
-                            <div class="parca-adi">${parca.Parca_Adi}</div>
-                            <div class="parca-fiyat">${parca.Fiyat} TL</div>
-                            <button class="btn-onay" onclick="siparisOnayla('${parca.Parca_Adi}', '${parca.Fiyat}')">🛒 Siparişi Onayla</button>
-                        `;
-                        katalogAlani.appendChild(kart);
-                    });
+                const data = await response.json();
+                
+                if (data.parcalar && data.parcalar.length > 0) {
+                    aracData = data;
+                    gosterParcalar(data);
                 } else {
-                    result.className = 'result error';
-                    result.style.display = 'block';
-                    result.innerHTML = '<h3>❌ ' + (res.mesaj || 'Uygun parça bulunamadı') + '</h3>';
+                    alert('Bu şase numarası için parça bulunamadı.');
                 }
-            } catch (error) {
-                loading.style.display = 'none';
-                result.className = 'result error';
-                result.style.display = 'block';
-                result.innerHTML = '<h3>❌ Bağlantı hatası</h3>';
-            }
-        });
-
-        async function siparisOnayla(parcaAdi, fiyat) {
-            if (!confirm(parcaAdi + ' için sipariş oluşturulsun mu?')) return;
-
-            result.style.display = 'block';
-            result.className = 'result success';
-            result.innerHTML = '⚙️ Siparişiniz işleniyor, lütfen bekleyin...';
-
-            // Burası n8n'deki "Sipariş Kaydı" adımını tetikleyecek olan kısımdır.
-            // Aynı webhook'a "onay: true" bilgisi gönderiyoruz.
-            const data = {
-                onay: true,
-                secilen_parca: parcaAdi,
-                fiyat: fiyat,
-                sase_numarasi: document.getElementById('sase').value,
-                ad_soyad: document.getElementById('ad').value,
-                email: document.getElementById('email').value,
-                telefon: document.getElementById('telefon').value
-            };
-
-            try {
-                const response = await fetch('https://nongraphic-cozily-randolph.ngrok-free.dev/webhook-test/sase-sorgu', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const finalRes = await response.json();
                 
-                result.innerHTML = `<h3>✅ Sipariş Alındı!</h3><p>${parcaAdi} için kaydınız oluşturuldu.</p>`;
-                katalogAlani.innerHTML = ''; // Kataloğu gizle
-            } catch (e) {
-                result.className = 'result error';
-                result.innerHTML = '<h3>❌ Onay işlemi başarısız.</h3>';
+            } catch (error) {
+                alert('Bağlantı hatası: ' + error.message);
+            }
+            
+            document.getElementById('sorgulaBtn').disabled = false;
+            document.getElementById('loading').classList.add('hidden');
+        });
+        
+        // Parçaları Göster
+        function gosterParcalar(data) {
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            
+            // Araç Bilgisi
+            document.getElementById('aracBilgi').innerHTML = `
+                <h2>🏍️ ${data.marka} ${data.model} (${data.yil})</h2>
+                <p><strong>Şase:</strong> ${data.sase_numarasi}</p>
+                <p><strong>Toplam Parça:</strong> ${data.toplam_parca} adet (${data.stokta_olan} adet stokta)</p>
+            `;
+            
+            // Parçalar Grid
+            const grid = document.getElementById('parcalarGrid');
+            grid.innerHTML = '';
+            
+            data.parcalar.forEach(parca => {
+                const card = document.createElement('div');
+                card.className = 'parca-card' + (parca.stokta ? '' : ' stok-yok');
+                card.innerHTML = `
+                    <img src="${parca.gorsel_url || 'https://via.placeholder.com/200x150?text=Görsel+Yok'}" 
+                         class="parca-gorsel" 
+                         onerror="this.src='https://via.placeholder.com/200x150?text=Görsel+Yok'">
+                    <div class="parca-isim">${parca.parca_adi}</div>
+                    <div class="parca-fiyat">${parca.fiyat} TL</div>
+                    <div class="parca-stok">Stok: ${parca.stok_miktari}</div>
+                    <span class="stok-badge ${parca.stokta ? 'stok-var' : 'stok-yok-badge'}">
+                        ${parca.stokta ? '✓ Stokta' : '✗ Stokta Yok'}
+                    </span>
+                    ${parca.stokta ? `
+                        <div class="checkbox-wrapper">
+                            <label>
+                                <input type="checkbox" class="parca-checkbox" data-kod="${parca.parca_kodu}">
+                                Seç
+                            </label>
+                        </div>
+                    ` : ''}
+                `;
+                
+                if (parca.stokta) {
+                    card.addEventListener('click', (e) => {
+                        if (e.target.type !== 'checkbox') {
+                            const checkbox = card.querySelector('.parca-checkbox');
+                            checkbox.checked = !checkbox.checked;
+                            parcaSecimDegisti();
+                        }
+                    });
+                }
+                
+                grid.appendChild(card);
+            });
+            
+            // Checkbox event listeners
+            document.querySelectorAll('.parca-checkbox').forEach(cb => {
+                cb.addEventListener('change', parcaSecimDegisti);
+            });
+        }
+        
+        // Parça Seçimi Değişti
+        function parcaSecimDegisti() {
+            secilenParcalar = [];
+            let toplam = 0;
+            
+            document.querySelectorAll('.parca-checkbox:checked').forEach(cb => {
+                const kod = cb.dataset.kod;
+                const parca = aracData.parcalar.find(p => p.parca_kodu === kod);
+                
+                if (parca) {
+                    secilenParcalar.push(parca);
+                    toplam += parca.fiyat;
+                    cb.closest('.parca-card').classList.add('selected');
+                }
+            });
+            
+            document.querySelectorAll('.parca-checkbox:not(:checked)').forEach(cb => {
+                cb.closest('.parca-card').classList.remove('selected');
+            });
+            
+            // Özet Güncelle
+            if (secilenParcalar.length > 0) {
+                document.getElementById('secilenParcalar').innerHTML = 
+                    secilenParcalar.map(p => `${p.parca_adi} - ${p.fiyat} TL`).join('<br>');
+                document.getElementById('toplamFiyat').textContent = toplam + ' TL';
+                document.getElementById('siparisBtn').disabled = false;
+            } else {
+                document.getElementById('secilenParcalar').textContent = 'Henüz parça seçilmedi';
+                document.getElementById('toplamFiyat').textContent = '0 TL';
+                document.getElementById('siparisBtn').disabled = true;
             }
         }
+        
+        // Geri Dön
+        document.getElementById('geriBtn').addEventListener('click', () => {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+        });
+        
+        // Sipariş Ver (Şimdilik alert)
+        document.getElementById('siparisBtn').addEventListener('click', () => {
+            alert('Sipariş oluşturma henüz hazır değil. Önce bu kısmı test edin!');
+            console.log('Seçilen Parçalar:', secilenParcalar);
+            console.log('Müşteri:', musteriData);
+        });
     </script>
 </body>
 </html>
